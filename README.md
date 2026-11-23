@@ -1,8 +1,8 @@
 # CAVEAT
 
 <p align="center">
-  <b>Causally Constrained Adversarial Attacks via Granger-structural Confinement</b>
-  <br> <i>[Under submission at Elsevier ASOC Journal]</i> </br>
+  <b>CAVEAT: Causality-Aware Vehicular Emission Forecasting via Adaptive Granger Graph Learning</b>
+  <br> <i>[Under submission at Elsevier Journal]</i> </br>
 </p>
 <p align="center">
   <!-- <a> href="https://openreview.net/forum?id=Al4OnLoQsp"> -->
