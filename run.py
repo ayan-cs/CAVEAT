@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 import config
-from utils import registry_name, run_prefix
+from utils import registry_name, run_prefix, unfinished_run
 
 # ======================================================================== #
 # Edit here                                                                #
@@ -26,7 +26,8 @@ ARTIFACTS_DIR = "artifacts"   # per-seed roots artifacts/seed<S>/ are added auto
 DEVICE = "cuda"            # "auto" | "cuda" | "cpu"
 GPU = None                 # e.g. 0 to pin this window to one card; None = default
 PROMOTE = True             # each new run becomes the selected run in its registry
-SKIP_IF_DONE = False        # skip a stage this job has already finished (checked per stage)
+SKIP_IF_DONE = True        # skip a stage this job has already finished (checked per stage)
+RESUME = True              # continue an interrupted run from its completed trials instead of starting over
 # ======================================================================== #
 
 MODULES = {"train": "train", "feedback": "graph_feedback"}
@@ -80,7 +81,7 @@ def newest_dir(parent, patterns, since):
 
 
 def train_done(dataset, scale_mode, seed):
-    return any(dataset_root(dataset, seed).glob(f"{train_prefix(scale_mode, seed)}__*/best/model.pt"))
+    return any(dataset_root(dataset, seed).glob(f"{train_prefix(scale_mode, seed)}__*/meta.json"))
 
 
 def selected_train_run(dataset, scale_mode, seed):
@@ -93,7 +94,7 @@ def train_finished(run_dir):
 
 
 def feedback_done(source_run):
-    return any(any(Path(source_run).glob(f"{pat}/best/model.pt")) for pat in FEEDBACK_PATTERNS)
+    return any(any(Path(source_run).glob(f"{pat}/meta.json")) for pat in FEEDBACK_PATTERNS)
 
 
 def main():
@@ -122,12 +123,19 @@ def run_job(stage, tag, dataset, scale_mode, seed, snapshot_path, env, source_ru
         "--artifacts-dir", str(seed_root(seed)),
         "--device", DEVICE,
         "--promote" if PROMOTE else "--no-promote",
+        "--resume" if RESUME else "--no-resume",
         "--config", str(snapshot_path),
     ]
     if source_run is not None:
         cmd += ["--source-run", Path(source_run).as_posix()]
 
+    parent = dataset_root(dataset, seed) if stage == "train" else Path(source_run)
+    patterns = [f"{train_prefix(scale_mode, seed)}__*"] if stage == "train" else FEEDBACK_PATTERNS
+    resume_dir = unfinished_run(parent, patterns) if RESUME else None
+
     print(f"\nRunning: {tag} | {stage}   [{getTime()}]", flush=True)
+    if resume_dir is not None:
+        print(f"[RESUME] {tag} {stage}: continuing {resume_dir}", flush=True)
     t1, started = time.perf_counter(), time.time()
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, env=env)
     try:
@@ -140,8 +148,7 @@ def run_job(stage, tag, dataset, scale_mode, seed, snapshot_path, env, source_ru
         raise
 
     minutes = (time.perf_counter() - t1) / 60
-    run_dir = (newest_dir(dataset_root(dataset, seed), [f"{train_prefix(scale_mode, seed)}__*"], started)
-               if stage == "train" else newest_dir(source_run, FEEDBACK_PATTERNS, started))
+    run_dir = resume_dir or newest_dir(parent, patterns, started)
     log = run_dir / "run.log" if run_dir else "the error above (no run folder was created)"
     if code == 0:
         print(f"[OK] {tag} {stage} finished in {minutes:.1f} min | log -> {log}", flush=True)

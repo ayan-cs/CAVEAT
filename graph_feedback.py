@@ -13,11 +13,11 @@ from metrics import discovery_metrics
 from model import CausalLSTM, ErrorCompensation
 from services import Criterion, EarlyStopper
 from data import paths as data_paths
-from train import (FORECAST_KEYS, LOSS_KEYS, REGISTRY_DISCOVERY_KEYS, STAGE, _cpu_state, _gt_summary, _prefixed,
-                   _Running, evaluate_forecasts, loss_pass, parse_args, plateau_scheduler, train_phase2, trial_row,
-                   write_csv)
+from train import (CHECKPOINT, FORECAST_KEYS, LOSS_KEYS, REGISTRY_DISCOVERY_KEYS, STAGE, _cpu_state, _gt_summary,
+                   _prefixed, _Running, evaluate_forecasts, loss_pass, parse_args, plateau_scheduler, resume_grid,
+                   save_checkpoint, train_phase2, trial_row, write_csv)
 from utils import (Timer, columns, env_info, fmt_seconds, get_logger, load_json, registry_name,
-                   resolve_device, save_json, set_deterministic, timestamp, to_loader, unique_dir,
+                   resolve_device, save_json, set_deterministic, timestamp, to_loader, unfinished_run, unique_dir,
                    update_registry)
 
 FEEDBACK_STAGE = "feedback"
@@ -173,7 +173,9 @@ def feedback_for(args):
             "npz": data_paths.dataset_npz(dataset, scale_mode, args.data_dir),
             "has_ground_truth": ds.has_ground_truth, "feature_names": ds.feature_names}
 
-    run_dir = unique_dir(src / "feedback")
+    run_dir = unfinished_run(src, ["feedback", "feedback__r*"]) if args.resume else None
+    resumed = run_dir is not None
+    run_dir = run_dir or unique_dir(src / "feedback")
     trials_dir = run_dir / "trials"
     trials_dir.mkdir(parents=True, exist_ok=True)
     width = max(2, len(str(len(trials))))
@@ -181,16 +183,20 @@ def feedback_for(args):
     logger.info("=" * 88)
     logger.info(f"graph feedback | dataset={dataset} | scale_mode={scale_mode} | seed={seed} "
                 f"| source={src.name} (trial {source_cfg['trial']}) | device={device} | started {timestamp()}")
-    logger.info(f"run_dir={run_dir}")
+    logger.info(f"run_dir={run_dir}" + (" (resumed)" if resumed else ""))
     logger.info(f"[stage2] threshold={thr if thr is None else f'{thr:.4g}'} (adaptive) "
                 f"| usage {discovery['variable_usage_pct']:.2f}%{_gt_summary(discovery)}")
     logger.info(f"{len(trials)} trials | select_metric={config.FEEDBACK['select_metric']} "
                 f"| overrides={config.FEEDBACK['overrides']} | config={args.config or 'config.py'}")
 
     csv_path = run_dir / "grid_results.csv"
-    rows, best, failed = [], None, []
+    rows, failed, best = (resume_grid(run_dir, trials, config.FEEDBACK["select_metric"], logger) if resumed
+                          else ([], [], None))
+    done = {int(r["trial"]) for r in rows}
     with Timer() as grid_timer:
         for i, hp in enumerate(trials, start=1):
+            if i in done:
+                continue
             logger.info("-" * 88)
             logger.info(f"  trial {i:0{width}d}/{len(trials)} | started {timestamp()} | hp={hp}")
             try:
@@ -204,6 +210,10 @@ def feedback_for(args):
 
             m = out["metrics"]
             m["discovery"] = discovery
+            score = m["selection"]["score"]
+            if best is None or score < best["score"] - 1e-12:
+                best = {"score": score, "trial": i, "hp": hp, "out": out}
+                save_checkpoint(trials_dir, best)
             save_json({"trial": i, "hp": hp,
                        "history": {"phase1": columns(out["rows1"]), "phase2": columns(out["rows2"])},
                        "metrics": m}, trials_dir / f"trial_{i:0{width}d}__history.json")
@@ -214,11 +224,15 @@ def feedback_for(args):
                         f" | usage={m['variable_usage_pct']:.2f}% | test_rmse={t.get('rmse', float('nan')):.6f} "
                         f"| test_crps={t.get('crps', float('nan')):.6f} "
                         f"| {fmt_seconds(m['timing']['phase1_s'] + m['timing']['phase2_s'] + m['timing']['eval_s'])}")
-
-            score = m["selection"]["score"]
-            if best is None or score < best["score"] - 1e-12:
-                best = {"score": score, "trial": i, "hp": hp, "out": out}
             del out
+
+        if best is not None and best["out"] is None:
+            logger.info("-" * 88)
+            logger.info(f"[resume] re-training trial {best['trial']} to recover its weights "
+                        f"(not saved before the interruption) | hp={best['hp']}")
+            best["out"] = run_graph_feedback(ds, splits, graph, best["hp"], seed, device, logger)
+            best["out"]["metrics"]["discovery"] = discovery
+            best["score"] = best["out"]["metrics"]["selection"]["score"]
 
     if best is None:
         logger.error(f"[ABORT] every feedback trial failed for {dataset}/{scale_mode} seed {seed}")
@@ -234,7 +248,8 @@ def feedback_for(args):
                "best_trial": best["trial"], "best_hp": best["hp"],
                "select_metric": config.FEEDBACK["select_metric"], "best_score": best["score"],
                "feedback_config": config.FEEDBACK, "eval_config": config.EVAL,
-               "env": env_info()}, run_dir / "meta.json")
+               "resumed": resumed, "env": env_info()}, run_dir / "meta.json")
+    (trials_dir / CHECKPOINT).unlink(missing_ok=True)
 
     t = bm["forecast"].get("test", {})
     logger.info("=" * 88)

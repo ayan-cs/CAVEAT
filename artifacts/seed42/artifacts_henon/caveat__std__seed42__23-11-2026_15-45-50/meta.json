@@ -1,0 +1,253 @@
+{
+  "dataset": "henon",
+  "scale_mode": "std",
+  "seed": 42,
+  "npz": "data/henon/dataset_std.npz",
+  "has_ground_truth": true,
+  "feature_names": [
+    "x0",
+    "x1",
+    "x2",
+    "x3",
+    "x4",
+    "x5",
+    "x6",
+    "x7",
+    "x8",
+    "x9"
+  ],
+  "data": {
+    "name": "henon",
+    "n_vars": 10,
+    "n_steps": 5000,
+    "lookback": 25,
+    "horizon": 25,
+    "base_seed": 42,
+    "has_ground_truth": true,
+    "feature_names": [
+      "x0",
+      "x1",
+      "x2",
+      "x3",
+      "x4",
+      "x5",
+      "x6",
+      "x7",
+      "x8",
+      "x9"
+    ],
+    "parents_by_index": {
+      "0": [],
+      "1": [
+        0
+      ],
+      "2": [
+        1
+      ],
+      "3": [
+        2
+      ],
+      "4": [
+        3
+      ],
+      "5": [
+        4
+      ],
+      "6": [
+        5
+      ],
+      "7": [
+        6
+      ],
+      "8": [
+        7
+      ],
+      "9": [
+        8
+      ]
+    },
+    "n_windows": {
+      "train": 3451,
+      "val": 701,
+      "test": 701
+    },
+    "scale_mode": "std",
+    "norm_mean": [
+      0.35680919885635376,
+      0.5211737155914307,
+      0.49814340472221375,
+      0.44277408719062805,
+      0.5042160749435425,
+      0.5205521583557129,
+      0.49162495136260986,
+      0.5242171883583069,
+      0.5146207213401794,
+      0.46594470739364624
+    ],
+    "norm_std": [
+      1.011128544807434,
+      1.0058616399765015,
+      1.0887935161590576,
+      1.0594847202301025,
+      1.0502700805664062,
+      1.0607945919036865,
+      1.0786689519882202,
+      1.0701724290847778,
+      1.102685809135437,
+      1.0825104713439941
+    ],
+    "raw_mean": [
+      0.35680919885635376,
+      0.5211737155914307,
+      0.49814340472221375,
+      0.44277408719062805,
+      0.5042160749435425,
+      0.5205521583557129,
+      0.49162495136260986,
+      0.5242171883583069,
+      0.5146207213401794,
+      0.46594470739364624
+    ],
+    "raw_std": [
+      1.011128544807434,
+      1.0058616399765015,
+      1.0887935161590576,
+      1.0594847202301025,
+      1.0502700805664062,
+      1.0607945919036865,
+      1.0786689519882202,
+      1.0701724290847778,
+      1.102685809135437,
+      1.0825104713439941
+    ],
+    "splits": {
+      "train": [
+        0,
+        3500
+      ],
+      "val": [
+        3500,
+        4250
+      ],
+      "test": [
+        4250,
+        5000
+      ]
+    },
+    "params": {
+      "D": 10,
+      "T": 5000,
+      "seed": 42,
+      "a": 1.4,
+      "b": 0.3,
+      "burn_in": 1000,
+      "eps": 0.01
+    },
+    "created_utc": "2026-10-30T11:49:42.514064+00:00"
+  },
+  "stage": "caveat",
+  "device": "cuda",
+  "run_dir": "artifacts/seed42/artifacts_henon/caveat__std__seed42__23-11-2026_15-45-50",
+  "args": {
+    "dataset": "henon",
+    "scale_mode": "std",
+    "seed": 42,
+    "data_dir": "data",
+    "artifacts_dir": "artifacts\\seed42",
+    "device": "cuda",
+    "promote": true,
+    "resume": true,
+    "config": "run.py snapshot"
+  },
+  "n_dim": 10,
+  "lookback": 25,
+  "horizon": 25,
+  "sizes": {
+    "train": 3451,
+    "val": 701,
+    "test": 701
+  },
+  "n_trials": 8,
+  "n_ok": 8,
+  "failed_trials": [],
+  "grid_time_s": 2300.14,
+  "grid_time_h": 0.6389,
+  "best_trial": 8,
+  "best_hp": {
+    "lr": 0.01,
+    "batch_size": 2048,
+    "hidden_size": 256,
+    "lam": 0.005,
+    "lam_ridge": 0.01,
+    "beta_kl": 0.005,
+    "beta_e": 1.0
+  },
+  "select_metric": "val_mse",
+  "best_score": 0.5311639308929443,
+  "param_grid": {
+    "lr": [
+      0.01
+    ],
+    "batch_size": [
+      2048
+    ],
+    "hidden_size": [
+      256
+    ],
+    "lam": [
+      0.01,
+      0.005
+    ],
+    "lam_ridge": [
+      0.1,
+      0.01
+    ],
+    "beta_kl": [
+      0.01,
+      0.005
+    ],
+    "beta_e": [
+      1.0
+    ]
+  },
+  "train_config": {
+    "epochs": 10000,
+    "phase1": {
+      "patience": 200,
+      "lr_patience": 30,
+      "lr_factor": 0.1,
+      "min_lr": 1e-06
+    },
+    "phase2": {
+      "patience": 100,
+      "lr_patience": 30,
+      "lr_factor": 0.1,
+      "min_lr": 1e-06
+    },
+    "log_every": 20,
+    "select_metric": "val_mse"
+  },
+  "eval_config": {
+    "splits": [
+      "val",
+      "test",
+      "ood"
+    ],
+    "n_samples": 100,
+    "error_scale": 0.01
+  },
+  "resumed": true,
+  "env": {
+    "hostname": "AG-A5KPro",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.5",
+    "torch": "2.13.0+cu132",
+    "numpy": "2.3.5",
+    "cuda_available": true,
+    "cuda_version": "13.2",
+    "git_commit": "f524c73",
+    "command": "D:\\PHD Works\\CausalTS1\\causal_obd_new\\CAVEAT\\train.py --dataset henon --scale-mode std --seed 42 --data-dir data --artifacts-dir artifacts\\seed42 --device cuda --promote --resume --config artifacts\\config_snapshots\\config_snapshot__both__23-11-2026_23-21-33.json",
+    "gpu_name": "NVIDIA RTX 5000 Ada Generation",
+    "gpu_total_mem_gb": 31.99
+  }
+}

@@ -1,7 +1,7 @@
 # CAVEAT
 
 <p align="center">
-  <b>CAVEAT: Causality-Aware Vehicular Emission Forecasting via Adaptive Granger Graph Learning</b>
+  <b>Causality-Aware Vehicular Emission Forecasting via Adaptive Granger Graph Learning</b>
   <br> <i>[Under submission at Elsevier Journal]</i> </br>
 </p>
 <p align="center">

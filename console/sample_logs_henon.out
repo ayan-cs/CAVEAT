@@ -1,4 +1,0 @@
-stage both (train -> feedback) | 1 jobs | artifacts -> artifacts/seed<S> | config snapshot (removed when the queue ends) -> artifacts\config_snapshots\config_snapshot__both__23-11-2026_12-19-34.json
-queue: [('henon', 'std', 42)]
-
-Running: henon/std seed42 | train   [23-11-2026_12-19-34]

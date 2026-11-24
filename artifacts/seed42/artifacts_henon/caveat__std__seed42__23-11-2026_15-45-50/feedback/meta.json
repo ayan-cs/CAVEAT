@@ -1,0 +1,97 @@
+{
+  "dataset": "henon",
+  "scale_mode": "std",
+  "seed": 42,
+  "source_run": "artifacts/seed42/artifacts_henon/caveat__std__seed42__23-11-2026_15-45-50",
+  "source_trial": 8,
+  "npz": "data/henon/dataset_std.npz",
+  "has_ground_truth": true,
+  "feature_names": [
+    "x0",
+    "x1",
+    "x2",
+    "x3",
+    "x4",
+    "x5",
+    "x6",
+    "x7",
+    "x8",
+    "x9"
+  ],
+  "stage": "feedback",
+  "device": "cuda",
+  "run_dir": "artifacts/seed42/artifacts_henon/caveat__std__seed42__23-11-2026_15-45-50/feedback",
+  "args": {
+    "dataset": "henon",
+    "scale_mode": "std",
+    "seed": 42,
+    "data_dir": "data",
+    "artifacts_dir": "artifacts\\seed42",
+    "device": "cuda",
+    "promote": true,
+    "resume": true,
+    "config": "run.py snapshot",
+    "source_run": "artifacts/seed42/artifacts_henon/caveat__std__seed42__23-11-2026_15-45-50"
+  },
+  "n_dim": 10,
+  "lookback": 25,
+  "horizon": 25,
+  "n_trials": 1,
+  "n_ok": 1,
+  "failed_trials": [],
+  "grid_time_s": 138.36,
+  "grid_time_h": 0.0384,
+  "best_trial": 1,
+  "best_hp": {
+    "lr": 0.01,
+    "batch_size": 2048,
+    "hidden_size": 256,
+    "lam": 0.005,
+    "lam_ridge": 0.01,
+    "beta_kl": 0.005,
+    "beta_e": 1.0
+  },
+  "select_metric": "val_mse",
+  "best_score": 0.10171537846326828,
+  "feedback_config": {
+    "epochs": 1000,
+    "phase1": {
+      "patience": 100,
+      "lr_patience": 20,
+      "lr_factor": 0.1,
+      "min_lr": 0.0
+    },
+    "phase2": {
+      "patience": 100,
+      "lr_patience": 20,
+      "lr_factor": 0.1,
+      "min_lr": 0.0
+    },
+    "grad_clip": 5.0,
+    "overrides": {},
+    "select_metric": "val_mse"
+  },
+  "eval_config": {
+    "splits": [
+      "val",
+      "test",
+      "ood"
+    ],
+    "n_samples": 100,
+    "error_scale": 0.01
+  },
+  "resumed": false,
+  "env": {
+    "hostname": "AG-A5KPro",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.5",
+    "torch": "2.13.0+cu132",
+    "numpy": "2.3.5",
+    "cuda_available": true,
+    "cuda_version": "13.2",
+    "git_commit": "f524c73",
+    "command": "D:\\PHD Works\\CausalTS1\\causal_obd_new\\CAVEAT\\graph_feedback.py --dataset henon --scale-mode std --seed 42 --data-dir data --artifacts-dir artifacts\\seed42 --device cuda --promote --resume --config artifacts\\config_snapshots\\config_snapshot__both__23-11-2026_23-21-33.json --source-run artifacts/seed42/artifacts_henon/caveat__std__seed42__23-11-2026_15-45-50",
+    "gpu_name": "NVIDIA RTX 5000 Ada Generation",
+    "gpu_total_mem_gb": 31.99
+  }
+}

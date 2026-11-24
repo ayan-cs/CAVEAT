@@ -1,0 +1,61 @@
+2026-11-23 23:59:58 | INFO    | ========================================================================================
+2026-11-23 23:59:58 | INFO    | graph feedback | dataset=henon | scale_mode=std | seed=42 | source=caveat__std__seed42__23-11-2026_15-45-50 (trial 8) | device=cuda | started 23-11-2026_23-59-58
+2026-11-23 23:59:58 | INFO    | run_dir=artifacts\seed42\artifacts_henon\caveat__std__seed42__23-11-2026_15-45-50\feedback
+2026-11-23 23:59:58 | INFO    | [stage2] threshold=1.06 (adaptive) | usage 19.00% | auroc 1.000 f1 1.000 shd 0
+2026-11-23 23:59:58 | INFO    | 1 trials | select_metric=val_mse | overrides={} | config=run.py snapshot
+2026-11-23 23:59:58 | INFO    | ----------------------------------------------------------------------------------------
+2026-11-23 23:59:58 | INFO    |   trial 01/1 | started 23-11-2026_23-59-58 | hp={'lr': 0.01, 'batch_size': 2048, 'hidden_size': 256, 'lam': 0.005, 'lam_ridge': 0.01, 'beta_kl': 0.005, 'beta_e': 1.0}
+2026-11-23 23:59:59 | INFO    |     [fb phase1] epoch     1 | train 31.255253 | val 16.873056 | lr 1.00e-02
+2026-11-24 00:00:02 | INFO    |     [fb phase1] epoch    21 | train 1.130350 | val 1.031542 | lr 1.00e-02
+2026-11-24 00:00:05 | INFO    |     [fb phase1] epoch    41 | train 0.518154 | val 0.510118 | lr 1.00e-02
+2026-11-24 00:00:08 | INFO    |     [fb phase1] epoch    61 | train 0.450322 | val 0.452416 | lr 1.00e-02
+2026-11-24 00:00:11 | INFO    |     [fb phase1] epoch    81 | train 0.408689 | val 0.413299 | lr 1.00e-02
+2026-11-24 00:00:13 | INFO    |     [fb phase1] epoch   101 | train 0.394659 | val 0.398910 | lr 1.00e-02
+2026-11-24 00:00:16 | INFO    |     [fb phase1] epoch   121 | train 0.379585 | val 0.385090 | lr 1.00e-02
+2026-11-24 00:00:19 | INFO    |     [fb phase1] epoch   141 | train 0.368271 | val 0.371904 | lr 1.00e-02
+2026-11-24 00:00:21 | INFO    |     [fb phase1] epoch   161 | train 0.364830 | val 0.369596 | lr 1.00e-02
+2026-11-24 00:00:24 | INFO    |     [fb phase1] epoch   181 | train 0.350599 | val 0.349551 | lr 1.00e-02
+2026-11-24 00:00:27 | INFO    |     [fb phase1] epoch   201 | train 0.355127 | val 0.353025 | lr 1.00e-02
+2026-11-24 00:00:29 | INFO    |     [fb phase1] epoch   221 | train 0.353195 | val 0.354110 | lr 1.00e-02
+2026-11-24 00:00:32 | INFO    |     [fb phase1] epoch   241 | train 0.329308 | val 0.330146 | lr 1.00e-02
+2026-11-24 00:00:34 | INFO    |     [fb phase1] epoch   261 | train 0.324191 | val 0.323535 | lr 1.00e-02
+2026-11-24 00:00:37 | INFO    |     [fb phase1] epoch   281 | train 0.318799 | val 0.324391 | lr 1.00e-02
+2026-11-24 00:00:39 | INFO    |     [fb phase1] epoch   301 | train 0.312688 | val 0.318595 | lr 1.00e-02
+2026-11-24 00:00:41 | INFO    |     [fb phase1] epoch   321 | train 0.313227 | val 0.316820 | lr 1.00e-02
+2026-11-24 00:00:44 | INFO    |     [fb phase1] epoch   341 | train 0.306197 | val 0.308801 | lr 1.00e-02
+2026-11-24 00:00:46 | INFO    |     [fb phase1] epoch   361 | train 0.288942 | val 0.289174 | lr 1.00e-03
+2026-11-24 00:00:49 | INFO    |     [fb phase1] epoch   381 | train 0.287174 | val 0.288540 | lr 1.00e-03
+2026-11-24 00:00:51 | INFO    |     [fb phase1] epoch   401 | train 0.286886 | val 0.289343 | lr 1.00e-03
+2026-11-24 00:00:54 | INFO    |     [fb phase1] epoch   421 | train 0.286605 | val 0.287267 | lr 1.00e-03
+2026-11-24 00:00:56 | INFO    |     [fb phase1] epoch   441 | train 0.285707 | val 0.286743 | lr 1.00e-03
+2026-11-24 00:00:59 | INFO    |     [fb phase1] epoch   461 | train 0.284812 | val 0.285704 | lr 1.00e-04
+2026-11-24 00:01:01 | INFO    |     [fb phase1] epoch   481 | train 0.284611 | val 0.287112 | lr 1.00e-04
+2026-11-24 00:01:04 | INFO    |     [fb phase1] epoch   501 | train 0.284815 | val 0.284847 | lr 1.00e-05
+2026-11-24 00:01:07 | INFO    |     [fb phase1] epoch   521 | train 0.284651 | val 0.286754 | lr 1.00e-06
+2026-11-24 00:01:09 | INFO    |     [fb phase1] epoch   541 | train 0.284807 | val 0.285904 | lr 1.00e-07
+2026-11-24 00:01:12 | INFO    |     [fb phase1] epoch   561 | train 0.284317 | val 0.286870 | lr 1.00e-07
+2026-11-24 00:01:14 | INFO    |     [fb phase1] epoch   581 | train 0.285494 | val 0.286505 | lr 1.00e-08
+2026-11-24 00:01:17 | INFO    |     [fb phase1] epoch   601 | train 0.284627 | val 0.286687 | lr 1.00e-08
+2026-11-24 00:01:20 | INFO    |     [fb phase1] epoch   621 | train 0.284945 | val 0.283706 | lr 1.00e-08
+2026-11-24 00:01:22 | INFO    |     [fb phase1] epoch   641 | train 0.284896 | val 0.285280 | lr 1.00e-08
+2026-11-24 00:01:23 | INFO    |     [fb phase1] early stop at epoch 646 (best epoch 546)
+2026-11-24 00:01:23 | INFO    |     [fb phase2] epoch     1 | train 0.584271 | val 0.389841 | lr 1.00e-02
+2026-11-24 00:01:24 | INFO    |     [fb phase2] epoch    21 | train 0.104926 | val 0.104004 | lr 1.00e-02
+2026-11-24 00:01:26 | INFO    |     [fb phase2] epoch    41 | train 0.091739 | val 0.092788 | lr 1.00e-02
+2026-11-24 00:01:28 | INFO    |     [fb phase2] epoch    61 | train 0.091097 | val 0.092619 | lr 1.00e-02
+2026-11-24 00:01:29 | INFO    |     [fb phase2] epoch    81 | train 0.089830 | val 0.091625 | lr 1.00e-02
+2026-11-24 00:01:31 | INFO    |     [fb phase2] epoch   101 | train 0.088728 | val 0.091862 | lr 1.00e-02
+2026-11-24 00:01:32 | INFO    |     [fb phase2] epoch   121 | train 0.088650 | val 0.089705 | lr 1.00e-03
+2026-11-24 00:01:33 | INFO    |     [fb phase2] epoch   141 | train 0.087997 | val 0.088656 | lr 1.00e-03
+2026-11-24 00:01:35 | INFO    |     [fb phase2] epoch   161 | train 0.088268 | val 0.090967 | lr 1.00e-04
+2026-11-24 00:01:36 | INFO    |     [fb phase2] epoch   181 | train 0.088112 | val 0.089204 | lr 1.00e-05
+2026-11-24 00:01:38 | INFO    |     [fb phase2] epoch   201 | train 0.088078 | val 0.090012 | lr 1.00e-06
+2026-11-24 00:01:39 | INFO    |     [fb phase2] epoch   221 | train 0.088180 | val 0.088087 | lr 1.00e-07
+2026-11-24 00:01:40 | INFO    |     [fb phase2] epoch   241 | train 0.088142 | val 0.089934 | lr 1.00e-08
+2026-11-24 00:01:41 | INFO    |     [fb phase2] epoch   261 | train 0.088261 | val 0.089417 | lr 1.00e-08
+2026-11-24 00:01:42 | INFO    |     [fb phase2] early stop at epoch 270 (best epoch 170)
+2026-11-24 00:02:16 | INFO    |   trial 01 done | val_mse=0.101715 | usage=19.00% | test_rmse=0.855894 | test_crps=0.472155 | 2m17s
+2026-11-24 00:02:16 | INFO    | ========================================================================================
+2026-11-24 00:02:16 | INFO    | BEST | trial 1 | hp={'lr': 0.01, 'batch_size': 2048, 'hidden_size': 256, 'lam': 0.005, 'lam_ridge': 0.01, 'beta_kl': 0.005, 'beta_e': 1.0} | val_mse=0.101715 | test rmse 0.855894 | crps 0.472155
+2026-11-24 00:02:16 | INFO    | feedback finished in 2m18s | 0/1 failed | artifacts at artifacts\seed42\artifacts_henon\caveat__std__seed42__23-11-2026_15-45-50\feedback
+2026-11-24 00:02:16 | INFO    | [registry] caveat__std__seed42__23-11-2026_15-45-50/feedback: promoted (first run)

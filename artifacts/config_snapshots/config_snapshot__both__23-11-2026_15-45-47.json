@@ -1,0 +1,72 @@
+{
+  "PARAM_GRID": {
+    "lr": [
+      0.01
+    ],
+    "batch_size": [
+      2048
+    ],
+    "hidden_size": [
+      256
+    ],
+    "lam": [
+      0.01,
+      0.005
+    ],
+    "lam_ridge": [
+      0.1,
+      0.01
+    ],
+    "beta_kl": [
+      0.01,
+      0.005
+    ],
+    "beta_e": [
+      1.0
+    ]
+  },
+  "TRAIN": {
+    "epochs": 10000,
+    "phase1": {
+      "patience": 200,
+      "lr_patience": 30,
+      "lr_factor": 0.1,
+      "min_lr": 1e-06
+    },
+    "phase2": {
+      "patience": 100,
+      "lr_patience": 30,
+      "lr_factor": 0.1,
+      "min_lr": 1e-06
+    },
+    "log_every": 20,
+    "select_metric": "val_mse"
+  },
+  "EVAL": {
+    "splits": [
+      "val",
+      "test",
+      "ood"
+    ],
+    "n_samples": 100,
+    "error_scale": 0.01
+  },
+  "FEEDBACK": {
+    "epochs": 1000,
+    "phase1": {
+      "patience": 100,
+      "lr_patience": 20,
+      "lr_factor": 0.1,
+      "min_lr": 0.0
+    },
+    "phase2": {
+      "patience": 100,
+      "lr_patience": 20,
+      "lr_factor": 0.1,
+      "min_lr": 0.0
+    },
+    "grad_clip": 5.0,
+    "overrides": {},
+    "select_metric": "val_mse"
+  }
+}

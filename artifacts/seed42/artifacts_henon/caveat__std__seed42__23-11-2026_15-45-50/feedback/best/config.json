@@ -1,0 +1,60 @@
+{
+  "hp": {
+    "lr": 0.01,
+    "batch_size": 2048,
+    "hidden_size": 256,
+    "lam": 0.005,
+    "lam_ridge": 0.01,
+    "beta_kl": 0.005,
+    "beta_e": 1.0
+  },
+  "trial": 1,
+  "dataset": "henon",
+  "scale_mode": "std",
+  "seed": 42,
+  "source_run": "artifacts/seed42/artifacts_henon/caveat__std__seed42__23-11-2026_15-45-50",
+  "source_trial": 8,
+  "npz": "data/henon/dataset_std.npz",
+  "has_ground_truth": true,
+  "feature_names": [
+    "x0",
+    "x1",
+    "x2",
+    "x3",
+    "x4",
+    "x5",
+    "x6",
+    "x7",
+    "x8",
+    "x9"
+  ],
+  "select_metric": "val_mse",
+  "select_score": 0.10171537846326828,
+  "feedback_config": {
+    "epochs": 1000,
+    "phase1": {
+      "patience": 100,
+      "lr_patience": 20,
+      "lr_factor": 0.1,
+      "min_lr": 0.0
+    },
+    "phase2": {
+      "patience": 100,
+      "lr_patience": 20,
+      "lr_factor": 0.1,
+      "min_lr": 0.0
+    },
+    "grad_clip": 5.0,
+    "overrides": {},
+    "select_metric": "val_mse"
+  },
+  "eval_config": {
+    "splits": [
+      "val",
+      "test",
+      "ood"
+    ],
+    "n_samples": 100,
+    "error_scale": 0.01
+  }
+}

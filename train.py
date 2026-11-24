@@ -19,9 +19,10 @@ from model import CausalLSTM, ErrorCompensation
 from services import Criterion, EarlyStopper, ProximalGradientDescent
 from utils import (Timer, build_run_name, columns, env_info, fmt_seconds, get_logger, load_json,
                    registry_name, resolve_device, run_prefix, save_json, set_deterministic, timestamp,
-                   to_loader, unique_dir, update_registry)
+                   to_loader, unfinished_run, unique_dir, update_registry)
 
 STAGE = "caveat"
+CHECKPOINT = "best_so_far.pt"
 SCALE_MODES = ("std", "norm", "raw")
 LOSS_KEYS = ("loss", "mse", "kl")
 FORECAST_KEYS = ("rmse", "mae", "crps", "mmd", "picp90", "pinaw90", "rmse_orig", "mae_orig")
@@ -266,10 +267,48 @@ def trial_row(trial, hp, m):
 
 def write_csv(path, rows):
     fields = list(dict.fromkeys(k for r in rows for k in r))
-    with open(path, "w", newline="", encoding="utf-8") as f:
+    tmp = Path(path).with_suffix(".csv.tmp")
+    with open(tmp, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
+    os.replace(tmp, path)
+
+
+def save_checkpoint(trials_dir, best):
+    path = Path(trials_dir) / CHECKPOINT
+    tmp = path.with_suffix(".pt.tmp")
+    torch.save(best, tmp)
+    os.replace(tmp, path)
+
+
+def resume_grid(run_dir, trials, select_metric, logger):
+    with open(run_dir / "grid_results.csv", newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    for r in rows:
+        i = int(r["trial"])
+        if i > len(trials) or any(r.get(f"hp_{k}") != str(v) for k, v in trials[i - 1].items()):
+            raise RuntimeError(f"{run_dir} was run with a different hyperparameter grid (trial {i}); "
+                               f"restore that grid in config.py or set RESUME = False")
+    failed = [int(r["trial"]) for r in rows if r["status"] == "FAILED"]
+    ok = [r for r in rows if r["status"] == "OK"]
+    col, best = f"select_{select_metric}", None
+    if ok:
+        if col not in ok[0]:
+            raise RuntimeError(f"{run_dir} was selected by a different metric (no column {col!r}); "
+                               f"restore select_metric in config.py or set RESUME = False")
+        top = min(ok, key=lambda r: float(r[col]))
+        trial = int(top["trial"])
+        ckpt = run_dir / "trials" / CHECKPOINT
+        if ckpt.exists():
+            saved = torch.load(ckpt, map_location="cpu", weights_only=False)
+            if saved["trial"] == trial:
+                best = saved
+        if best is None:
+            best = {"score": float(top[col]), "trial": trial, "hp": trials[trial - 1], "out": None}
+    logger.info(f"[resume] {len(rows)}/{len(trials)} trials already done ({len(failed)} failed)"
+                + (f" | best so far: trial {best['trial']} ({col}={best['score']:.6f})" if best else ""))
+    return rows, failed, best
 
 
 def save_best(best_dir, out, hp, trial, ds, run_info):
@@ -306,7 +345,10 @@ def run_grid(args):
                 "data": load_json(data_paths.dataset_manifest(dataset, scale_mode, args.data_dir))}
 
     ds_dir = Path(args.artifacts_dir) / f"artifacts_{dataset}"
-    run_dir = unique_dir(ds_dir / build_run_name(run_prefix(STAGE, scale_mode, seed)))
+    prefix = run_prefix(STAGE, scale_mode, seed)
+    run_dir = unfinished_run(ds_dir, [f"{prefix}__*"]) if args.resume else None
+    resumed = run_dir is not None
+    run_dir = run_dir or unique_dir(ds_dir / build_run_name(prefix))
     trials_dir = run_dir / "trials"
     trials_dir.mkdir(parents=True, exist_ok=True)
     width = max(2, len(str(len(trials))))
@@ -317,16 +359,20 @@ def run_grid(args):
     logger.info(f"CAVEAT grid search | dataset={dataset} | scale_mode={scale_mode} "
                 f"| seed={seed} "
                 f"| device={device} | started {timestamp()}")
-    logger.info(f"run_dir={run_dir}")
+    logger.info(f"run_dir={run_dir}" + (" (resumed)" if resumed else ""))
     logger.info(f"[data] {run_info['npz']} | n_dim={ds.n_vars} | lookback={ds.lookback} | horizon={ds.horizon} "
                 f"| sizes={sizes}")
     logger.info(f"{len(trials)} trials | select_metric={config.TRAIN['select_metric']} "
                 f"| config={args.config or 'config.py'}")
 
     csv_path = run_dir / "grid_results.csv"
-    rows, best, failed = [], None, []
+    rows, failed, best = (resume_grid(run_dir, trials, config.TRAIN["select_metric"], logger) if resumed
+                          else ([], [], None))
+    done = {int(r["trial"]) for r in rows}
     with Timer() as grid_timer:
         for i, hp in enumerate(trials, start=1):
+            if i in done:
+                continue
             logger.info("-" * 88)
             logger.info(f"  trial {i:0{width}d}/{len(trials)} | started {timestamp()} | hp={hp}")
             try:
@@ -340,6 +386,10 @@ def run_grid(args):
                 continue
 
             m = out["metrics"]
+            score = m["selection"]["score"]
+            if best is None or score < best["score"] - 1e-12:
+                best = {"score": score, "trial": i, "hp": hp, "out": out}
+                save_checkpoint(trials_dir, best)
             save_json({"trial": i, "hp": hp,
                        "history": {"phase1": columns(out["rows1"], drop=("gc_raw", "gc_est")),
                                    "phase2": columns(out["rows2"])},
@@ -351,11 +401,14 @@ def run_grid(args):
                         f"{_gt_summary(d)} | usage={d['variable_usage_pct']:.2f}% "
                         f"| test_rmse={f.get('rmse', float('nan')):.6f} "
                         f"| {fmt_seconds(m['timing']['phase1_s'] + m['timing']['phase2_s'])}")
-
-            score = m["selection"]["score"]
-            if best is None or score < best["score"] - 1e-12:
-                best = {"score": score, "trial": i, "hp": hp, "out": out}
             del out
+
+        if best is not None and best["out"] is None:
+            logger.info("-" * 88)
+            logger.info(f"[resume] re-training trial {best['trial']} to recover its weights "
+                        f"(not saved before the interruption) | hp={best['hp']}")
+            best["out"] = run_trial(best["hp"], ds, splits, seed, device, logger)
+            best["score"] = best["out"]["metrics"]["selection"]["score"]
 
     if best is None:
         logger.error(f"[ABORT] every trial failed for {dataset}/{scale_mode} seed {seed}")
@@ -372,7 +425,8 @@ def run_grid(args):
                "best_trial": best["trial"], "best_hp": best["hp"],
                "select_metric": config.TRAIN["select_metric"], "best_score": best["score"],
                "param_grid": config.PARAM_GRID, "train_config": config.TRAIN, "eval_config": config.EVAL,
-               "env": env_info()}, run_dir / "meta.json")
+               "resumed": resumed, "env": env_info()}, run_dir / "meta.json")
+    (trials_dir / CHECKPOINT).unlink(missing_ok=True)
 
     logger.info("=" * 88)
     logger.info(f"BEST | trial {best['trial']} | hp={best['hp']} | "
@@ -418,6 +472,8 @@ def parse_args(argv=None, description="Grid search for one (dataset, scale_mode,
     p.add_argument("--device", default="auto", help='"auto" | "cuda" | "cuda:1" | "cpu"')
     p.add_argument("--promote", action=argparse.BooleanOptionalAction, default=True,
                    help="make this run the selected run in its registry")
+    p.add_argument("--resume", action=argparse.BooleanOptionalAction, default=False,
+                   help="continue the newest unfinished run of this job, keeping its completed trials")
     p.add_argument("--config", default=None,
                    help="JSON snapshot of config.py (written by run.py); default: config.py as is")
     if feedback:

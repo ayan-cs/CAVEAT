@@ -49,6 +49,12 @@ def registry_name(stage, scale_mode):
     return f"{stage}_registry__{scale_mode}.json"
 
 
+def unfinished_run(parent, patterns):
+    dirs = [d for pat in patterns for d in Path(parent).glob(pat)
+            if (d / "grid_results.csv").exists() and not (d / "meta.json").exists()]
+    return max(dirs, key=lambda d: (d / "grid_results.csv").stat().st_mtime, default=None)
+
+
 def build_run_name(*parts):
     return "__".join([*map(str, parts), timestamp()])
 

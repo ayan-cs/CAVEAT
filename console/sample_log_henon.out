@@ -1,0 +1,16 @@
+stage both (train -> feedback) | 1 jobs | artifacts -> artifacts/seed<S> | config snapshot (removed when the queue ends) -> artifacts\config_snapshots\config_snapshot__both__23-11-2026_15-45-47.json
+queue: [('henon', 'std', 42)]
+
+Running: henon/std seed42 | train   [23-11-2026_15-45-47]
+[RESUME] henon/std seed42 train: continuing artifacts\seed42\artifacts_henon\caveat__std__seed42__23-11-2026_15-45-50
+[OK] henon/std seed42 train finished in 38.4 min | log -> artifacts\seed42\artifacts_henon\caveat__std__seed42__23-11-2026_15-45-50\run.log
+
+Running: henon/std seed42 | feedback   [23-11-2026_23-59-56]
+[OK] henon/std seed42 feedback finished in 2.3 min | log -> artifacts\seed42\artifacts_henon\caveat__std__seed42__23-11-2026_15-45-50\feedback\run.log
+
+Execution summary (both):
+  henon/std seed42 train                      38.4 min  OK
+  henon/std seed42 feedback                    2.3 min  OK
+Total wall time: 40.7 min for 2 runs (0 skipped, 0 missing prerequisites)
+Failed runs: None
+Missing prerequisites: None
